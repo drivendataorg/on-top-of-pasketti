@@ -1,0 +1,228 @@
+set dotenv-load := true
+
+export UV_PROJECT := "runtime"
+
+track := env("KIDSASR_TRACK", "")
+block_internet := "true"
+
+# Local docker image
+LOCAL_REGISTRY := "local.invalid"
+IMAGE_NAME := "kids-asr-runtime"
+LOCAL_RUNTIME_IMAGE_REF := f"{{LOCAL_REGISTRY}}/{{IMAGE_NAME}}:dev"
+LOCAL_TEST_IMAGE_REF := f"{{LOCAL_REGISTRY}}/{{IMAGE_NAME}}:test"
+
+# Official docker image
+REGISTRY := "kidsasrprodacr.azurecr.io"
+RUNTIME_IMAGE_REF := f"{{REGISTRY}}/{{IMAGE_NAME}}:latest"
+
+WORKING_DIR := `pwd`
+DATA_DIR := env("KIDSASR_DATA_DIR", f"{{WORKING_DIR}}/data-demo/{{track}}")
+MOUNT_DATA := f"--mount type=bind,source={{DATA_DIR}},target=/code_execution/data,readonly"
+MOUNT_SUBMISSION := f"--mount type=bind,source={{WORKING_DIR}}/submission/,target=/code_execution/submission"
+ENV_VARS := f"-e KIDSASR_TRACK={{track}}"
+NETWORK_ARGS := if block_internet == "true" { "--network none" } else { "" }
+GPU_ARGS := `if nvidia-smi > /dev/null 2>&1; then echo "--gpus all"; else echo ""; fi`
+
+# Print this help documentation
+help:
+    @echo "Children's Speech Recognition Challenge Justfile Documentation"
+    @echo ""
+    @echo "Note: Some commands require you to specify the track as 'word' or 'phonetic', e.g.,"
+    @echo ""
+    @echo "    just track=word run"
+    @echo ""
+    @echo "---"
+    @just --list
+
+# Print active variables for debugging
+debug:
+    @echo "track={{track}}"
+    @echo "block_internet={{block_internet}}"
+    @echo "RUNTIME_IMAGE_REF={{RUNTIME_IMAGE_REF}}"
+    @echo "LOCAL_RUNTIME_IMAGE_REF={{LOCAL_RUNTIME_IMAGE_REF}}"
+    @echo "LOCAL_TEST_IMAGE_REF={{LOCAL_TEST_IMAGE_REF}}"
+    @echo "WORKING_DIR={{WORKING_DIR}}"
+    @echo "DATA_DIR={{DATA_DIR}}"
+    @echo "MOUNT_DATA={{MOUNT_DATA}}"
+    @echo "MOUNT_SUBMISSION={{MOUNT_SUBMISSION}}"
+    @echo "NETWORK_ARGS={{NETWORK_ARGS}}"
+
+_validate_track:
+    @if [ "{{track}}" != "word" ] && [ "{{track}}" != "phonetic" ]; then \
+        echo "Error: This recipe requires the 'track' variable to be set to 'word' or 'phonetic'. Got '{{track}}'."; \
+        exit 1; \
+    fi
+
+## Local testing
+
+# Pull official image
+[group('* test submission locally')]
+pull:
+    docker pull "{{RUNTIME_IMAGE_REF}}"
+
+[confirm("Are you sure you want to overwrite the existing submission/submission.zip file? (y/n)")]
+_confirm_submission_overwrite:
+    @echo "Overwriting existing submission/submission.zip file."
+    rm -f "{{WORKING_DIR}}/submission/submission.zip"
+
+# Pack submission_src/ into submission/submission.zip
+[group('* test submission locally')]
+pack-submission:
+    #!/usr/bin/env bash
+    shopt -s nullglob
+    files=(submission_src/*)
+    if (( ${#files[@]} == 0 )); then
+        echo "ERROR: submission_src/ directory is empty. Cannot create submission.zip with no files.";
+        exit 1
+    fi
+    if [ -f "{{WORKING_DIR}}/submission/submission.zip" ]; then
+        just _confirm_submission_overwrite;
+    fi
+    cd submission_src && uvx rpzip -r "{{WORKING_DIR}}/submission/submission.zip" ./*
+
+# Check contents of current submission.zip file
+[group('* test submission locally')]
+check-submission:
+    unzip -l submission/submission.zip
+    @submission_files=$(zip -sf submission/submission.zip); \
+    if ! grep -F -q -- "main.py" <<<"$submission_files"; then \
+    echo "ERROR: Submission ZIP archive must include main.py in the root directory."; \
+    exit 1; \
+    else \
+    echo "VALIDATION PASSED: Submission ZIP archive contains main.py."; \
+    fi
+
+# Run submission with official image
+[group('* test submission locally')]
+run: _validate_track
+    docker run \
+        --rm \
+        {{MOUNT_DATA}} \
+        {{MOUNT_SUBMISSION}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        "{{RUNTIME_IMAGE_REF}}"
+
+# Run official image with interactive shell
+[group('* test submission locally')]
+interact: _validate_track
+    docker run -it \
+        --rm \
+        {{MOUNT_DATA}} \
+        {{MOUNT_SUBMISSION}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        "{{LOCAL_RUNTIME_IMAGE_REF}}" \
+        bash
+
+
+## Dev
+
+# Lock dependencies
+[group('development')]
+lock *ARGS:
+    uv lock {{ARGS}}
+
+# Check whether lockfile is up to date
+[group('development')]
+lock-check:
+    uv lock --check
+
+# Build local dev runtime image
+[group('development')]
+build *ARGS:
+    docker build runtime/ --platform=linux/amd64 --target runtime --tag "{{LOCAL_RUNTIME_IMAGE_REF}}" {{ARGS}}
+
+# Build local GPU runtime image (Blackwell/cu128)
+[group('development')]
+gpu-build *ARGS:
+    docker build runtime/ --platform=linux/amd64 --target runtime --tag "{{LOCAL_RUNTIME_IMAGE_REF}}" -f runtime/Dockerfile.local {{ARGS}}
+
+# Run submission with local dev runtime image
+[group('development')]
+dev-run: _validate_track
+    docker run \
+        --rm \
+        {{MOUNT_DATA}} \
+        {{MOUNT_SUBMISSION}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        "{{LOCAL_RUNTIME_IMAGE_REF}}"
+
+MOUNT_RAW_AUDIO := "--mount type=bind,source=" + WORKING_DIR + "/../data/raw/audio,target=" + WORKING_DIR + "/../data/raw/audio,readonly"
+
+# Run submission with local GPU runtime image
+[group('development')]
+gpu-run: _validate_track
+    docker run \
+        --rm \
+        --gpus all \
+        {{MOUNT_DATA}} \
+        {{MOUNT_SUBMISSION}} \
+        {{MOUNT_RAW_AUDIO}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        "{{LOCAL_RUNTIME_IMAGE_REF}}"
+
+# Run local dev runtime image with interactive shell
+[group('development')]
+dev-interact: _validate_track
+    docker run -it \
+        --rm \
+        {{MOUNT_DATA}} \
+        {{MOUNT_SUBMISSION}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        "{{LOCAL_RUNTIME_IMAGE_REF}}" \
+        bash
+
+# Run submission with data archive unpacking using local dev runtime image
+# Used to simulate the behavior in the real runtime environment
+[group('development')]
+_dev-run-unpack-data: _validate_track
+    docker run \
+        --rm \
+        --mount type=bind,source={{WORKING_DIR}}/data-archive/{{track}},target=/code_execution/data-archive,readonly \
+        {{MOUNT_SUBMISSION}} \
+        {{NETWORK_ARGS}} \
+        {{ENV_VARS}} \
+        -e KIDSASR_UNPACK_DATA=1 \
+        "{{LOCAL_RUNTIME_IMAGE_REF}}"
+
+
+## Test image
+
+# Build local test runtime image
+[group('development')]
+test-build:
+    docker build runtime/ --platform=linux/amd64 --target test-runtime --tag "{{LOCAL_TEST_IMAGE_REF}}"
+
+# Run tests with local test runtime image
+[group('development')]
+test-run:
+    docker run \
+        --rm \
+        {{GPU_ARGS}} \
+        {{NETWORK_ARGS}} \
+        "{{LOCAL_TEST_IMAGE_REF}}"
+
+# Run local test runtime image with interactive shell
+[group('development')]
+test-interact:
+    docker run -it \
+        --rm \
+        {{GPU_ARGS}} \
+        {{NETWORK_ARGS}} \
+        "{{LOCAL_TEST_IMAGE_REF}}" \
+        bash
+
+
+## Examples
+
+# Pack example submission into a submission.zip file
+[group('* test submission locally')]
+pack-example EXAMPLE_NAME:
+    @if [ -f "{{WORKING_DIR}}/submission/submission.zip" ]; then \
+        just _confirm_submission_overwrite; \
+    fi
+    bash examples/{{EXAMPLE_NAME}}/pack_submission.sh submission/

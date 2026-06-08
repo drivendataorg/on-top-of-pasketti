@@ -1,0 +1,6 @@
+_target_: src.utils.decoder.MBRDecoder
+beam_width: 50
+temperature: 1.0
+blank_penalty: 0.0
+mbr_n_best: 50
+prob_temperature: 1.0

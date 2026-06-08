@@ -1,0 +1,25 @@
+# PyTorch CUDA build (cu130). Falls back to PyPI for everything else.
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.10.0
+torchaudio==2.10.0
+
+transformers==5.5.0
+tokenizers==0.22.2
+huggingface_hub==1.9.0
+safetensors==0.5.3
+accelerate==1.6.0
+
+datasets==3.4.0
+audiomentations==0.43.1
+librosa==0.11.0
+soundfile==0.13.1
+soxr==0.5.0.post1
+numpy==2.2.6
+scipy==1.17.0
+
+jiwer==3.1.0
+loguru==0.7.3
+tqdm==4.67.1
+
+# Model download from Google Drive
+gdown

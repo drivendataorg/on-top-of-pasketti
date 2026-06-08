@@ -1,0 +1,12 @@
+train:
+  _target_: src.preprocessing.dataset.BucketBatchSampler
+  batch_size: 8 # sweep from 2 to 32
+  bucket_multiplier: 10
+  shuffle: true
+  drop_last: false
+val:
+  _target_: src.preprocessing.dataset.BucketBatchSampler
+  batch_size: 8
+  bucket_multiplier: 10
+  shuffle: false
+  drop_last: false

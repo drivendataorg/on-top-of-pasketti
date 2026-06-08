@@ -1,0 +1,38 @@
+# Augmentation: HIGH
+# Aggressive waveform augmentations — stronger domain shift.
+# Targets child-speech variability (wider pitch, speed, freq masking).
+time_stretch:
+  enabled: true
+  min_rate: 0.8
+  max_rate: 1.2
+  p: 0.6
+
+pitch_shift:
+  enabled: true
+  min_semitones: -4.0
+  max_semitones: 3.0
+  p: 0.6
+
+band_stop_filter:
+  enabled: true
+  min_center_freq: 200.0
+  max_center_freq: 4000.0
+  min_bandwidth_fraction: 0.5
+  max_bandwidth_fraction: 1.99
+  p: 0.4
+
+masking:
+  enabled: true
+  mask_time_prob: 0.1
+  mask_feature_prob: 0.05
+  mask_time_length: 10
+  mask_feature_length: 10
+
+white_noise: 
+  enabled: false
+
+background_noise: 
+  enabled: true
+  snr_min: 5
+  snr_max: 10
+  p: 0.5

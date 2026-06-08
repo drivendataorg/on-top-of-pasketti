@@ -1,0 +1,11 @@
+--flagfile=flags/v13
+
+## ---- Dual-IPA multi-task ----
+--use_cross_labels
+--word_ctc
+#--pseudo_ipa_ctc
+--word_weight=0.3
+--use_word_only_dd
+--use_word_only_ext
+--word_ctc_bpe 
+

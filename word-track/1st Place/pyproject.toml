@@ -1,0 +1,104 @@
+[project]
+name = "drivendata-csrc"
+version = "0.1.0"
+requires-python = "==3.12.*"
+dependencies = [
+    "jiwer>=4.0.0",
+    "loguru>=0.7.3",
+    "pandas<3.0.0",
+    "typer>=0.23.1",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+    "ipywidgets>=8.1.8",
+    "pytest>=9.0.2",
+    "ruff>=0.14.10",
+    "tabulate>=0.9.0",
+    "ty>=0.0.8",
+]
+
+[tool.uv]
+conflicts = [
+    [
+        { package = "csrc-parakeet", extra = "nemo" },
+        { package = "csrc-qwen", extra = "vllm" },
+    ],
+    [
+        { package = "csrc-prep", extra = "nemo" },
+        { package = "csrc-qwen", extra = "vllm" },
+    ],
+]
+override-dependencies = [
+    "jiwer>=4.0.0",  # NeMo pins <4.0.0, but scoring needs >=4.0.0 for empty ref handling
+]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = [{ requirement = "torch", match-runtime = true }]
+
+[tool.uv.extra-build-variables]
+flash-attn = { FLASH_ATTENTION_SKIP_CUDA_BUILD = "TRUE" }
+
+[tool.uv.workspace]
+members = [
+    "csrc",
+    "csrc_prep",
+    "csrc_parakeet",
+    "csrc_qwen",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = ["childrens-speech-recognition-runtime", "csrc_qwen/src/csrc_qwen/qwen_asr", "csrc_vibevoice/src/vibevoice", "csrc_vibevoice/src/vllm_plugin"]
+
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "unsloth", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+unsloth = ["unsloth", "unsloth_zoo"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+
+ignore = [
+    "D",
+    "T",
+    "S",
+    "PGH",
+    "TRY",
+    "EM",
+    "FBT",
+    "TD",
+    "FIX",
+    "RET504",
+    "PD901",
+    "ERA001",
+    "N812",
+    "BLE",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF013",
+    "G004",
+    "PD901",
+    "N813",
+    "PLR2004"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/**/*.py" = ["INP001"]
+"**/tests/**/*.py" = ["INP001", "ANN201", "SLF001"]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ty]
+exclude = ["childrens-speech-recognition-runtime", "csrc_qwen/src/csrc_qwen/qwen_asr"]
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+
+invalid-argument-type = "ignore"
+invalid-parameter-default = "ignore"

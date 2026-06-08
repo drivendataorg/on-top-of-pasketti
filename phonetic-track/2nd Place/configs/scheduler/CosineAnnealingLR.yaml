@@ -1,0 +1,4 @@
+# CosineAnnealingLR scheduler — stepped every batch
+_target_: src.utils.cosine_lr_scheduler.CosineAnnealingLRScheduler
+eta_min: 1.0e-6
+total_steps: null

@@ -1,0 +1,19 @@
+dataloader:
+  num_workers: 4
+  prefetch_factor: 4
+  pin_memory: true
+num_epochs: 30
+guard_epochs: 2
+guard_PER: 0.3
+# Differential LR: backbone vs classification head
+backbone_lr: 2e-5
+head_lr: 5e-4 # sweep
+lla_lr: 1e-2
+weight_decay: 1e-2 #sweep
+max_grad_norm: 1.0
+optimizer:
+  _target_: torch.optim.AdamW
+mixed_precision: true
+gradient_checkpointing: false
+early_stopping_patience: 3
+freeze_backbone_epochs: 1

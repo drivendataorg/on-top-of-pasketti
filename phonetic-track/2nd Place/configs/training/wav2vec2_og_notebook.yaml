@@ -1,0 +1,17 @@
+# Training configuration
+dataloader:
+  batch_size: 8 # sweep from 2 to 32
+  num_workers: 2
+  pin_memory: true
+  bucket_multiplier: 10
+num_epochs: 50
+backbone_lr: 2e-5
+head_lr: 5e-4 
+weight_decay: 0.01 
+warmup_ratio: 0.15
+max_grad_norm: 1.0
+log_every: 50
+optimizer:
+  _target_: torch.optim.AdamW
+mixed_precision: true
+freeze_backbone_epochs: 0

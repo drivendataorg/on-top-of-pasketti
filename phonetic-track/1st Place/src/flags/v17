@@ -1,0 +1,7 @@
+--flagfile=flags/v16
+--aug_mix_fit_cost
+--aug_mix_max_cost=120
+--mix8
+--mix_csss
+--word_tokenizer=nemo
+--dual_bpe 

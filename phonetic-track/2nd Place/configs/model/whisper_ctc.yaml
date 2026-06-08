@@ -1,0 +1,11 @@
+_target_: src.utils.models.WhisperEncoderCTC
+whisper_model_id: openai/whisper-large-v3
+freeze_encoder: false
+classifier_dropout: 0.15
+augmentation: ${augmentation}
+gradient_checkpointing: ${training.gradient_checkpointing}
+interpolate_positional_embeddings: true
+backbone_lr: ${training.backbone_lr}
+head_lr: ${training.head_lr}
+enable_age_head: false
+age_head_lambda: 0.1

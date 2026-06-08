@@ -1,0 +1,72 @@
+debug: false
+data:
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+  test_jsonl: data/utterance_metadata.jsonl
+  audio_folder: data/audio
+preprocessing:
+  sample_rate: 16000
+  max_duration_sec: 5
+  sound_dimension: mono
+augmentation:
+  time_stretch:
+    enabled: true
+    min_rate: 0.92
+    max_rate: 1.08
+    p: 0.3
+  pitch_shift:
+    enabled: true
+    min_semitones: -2.0
+    max_semitones: 1.5
+    p: 0.3
+  band_stop_filter:
+    enabled: false
+    min_center_freq: 200.0
+    max_center_freq: 4000.0
+    min_bandwidth_fraction: 0.5
+    max_bandwidth_fraction: 1.5
+    p: 0.3
+cv:
+  holdout: true
+  n_folds: 5
+  splitter:
+    _target_: src.preprocessing.data_split.group_child_id_split
+    _partial_: true
+    n_splits: ${cv.n_folds}
+logging:
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+  use_random_name: true
+  project_name: model_aug_lr_sweep
+  log_interval: 10
+  save_dir: outputs
+device: cuda:0
+loss:
+  _target_: src.utils.loss.CTCLoss
+model:
+  decoder:
+    _target_: src.utils.decoder.PyCTCDecoder
+    beam_width: 15
+  _target_: src.utils.models.Wav2Vec2CTC
+  pretrained_name: microsoft/wavlm-base
+  classifier_dropout: 0.1
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+training:
+  dataloader:
+    batch_size: 32
+    num_workers: 2
+    pin_memory: true
+    bucket_multiplier: 10
+  num_epochs: 20
+  backbone_lr: 0.00016
+  head_lr: 0.002
+  weight_decay: 0.01
+  optimizer:
+    _target_: torch.optim.AdamW
+  mixed_precision: true
+  early_stopping_patience: 5
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  eta_min: 1.0e-06

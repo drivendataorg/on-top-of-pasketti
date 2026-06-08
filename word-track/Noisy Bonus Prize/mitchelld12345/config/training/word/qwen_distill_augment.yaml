@@ -1,0 +1,57 @@
+model:
+  type: qwen
+  name: Qwen/Qwen3-ASR-1.7B
+  checkpoint: null
+  freeze_audio_encoder: false
+  freeze_lm_layers: 0
+  batch_audio_tower: false
+
+data:
+  extra_manifest: tts_words/tts_words_manifest.jsonl
+
+distillation:
+  kl_alpha: 1.0
+  kl_alpha_min: 0.0
+
+training:
+  epochs: 10
+  max_steps: -1
+  batch_size: 16
+  max_batch_duration: 60
+  sampler: duration_bucket
+  gradient_accumulations: 4
+  precision: bf16-mixed
+  gradient_clip_val: 1.0
+  seed: 42
+  num_workers: 4
+  val_check_interval: 0.5
+  validate_first: true
+
+optimizer:
+  lr: 1e-5
+  weight_decay: 1e-2
+  warmup: 0.05
+
+augment:
+  noise: true
+  noise_cfg:
+    min_snr_db: 0
+    max_snr_db: 40
+    p: 0.5
+  gain: true
+  gain_cfg:
+    min_db: -6
+    max_db: 6
+    p: 0.5
+  time_stretch: true
+  time_stretch_cfg:
+    min_rate: 0.9
+    max_rate: 1.1
+    p: 0.3
+  pitch_shift: false
+
+checkpoint:
+  resume_from: null
+  save_top_k: 2
+  monitor: val_wer_norm
+  mode: min

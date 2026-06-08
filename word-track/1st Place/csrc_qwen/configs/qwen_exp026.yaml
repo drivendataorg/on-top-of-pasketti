@@ -1,0 +1,85 @@
+model_name_or_path: "qwen/Qwen3-ASR-1.7B"
+output_dir: "output/qwen_exp026/"
+train_audio_encoder: true
+train_projector: false
+prompt: "Transcribe only the children's voice."
+max_epochs: 3
+per_device_train_batch_size: 4
+eval_batch_size: 8
+gradient_accumulation_steps: 4
+gradient_checkpointing: true
+precision: "bf16"
+eval_steps: 5000
+save_steps: 5000
+save_total_limit: 10
+load_best_model_at_end: false
+metric_for_best_model: "loss"
+dataloader_num_workers: 4
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.0
+  target_modules:
+    [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj",
+    ]
+data:
+  train_sources:
+    - csv: "input/csrc-processed-input/train_pred_parakeet_exp013.csv"
+      audio_dir: "input/csrc-processed-input/audio"
+      filter_mode: "or"
+      wer_threshold:
+        "3-4": 0.9
+        "5-7": 0.9
+        "8-11": 0.9
+      cer_threshold:
+        "3-4": 0.5
+        "5-7": 0.5
+        "8-11": 0.5
+    - csv: "input/csrc-processed-talkbank/train_pred_parakeet_exp013.csv"
+      audio_dir: "input/csrc-processed-talkbank/audio"
+      max_text_len: 200
+      max_duration_sec: 30.0
+      filter_mode: "or"
+      wer_threshold:
+        "3-4": 0.9
+        "5-7": 0.9
+        "8-11": 0.9
+        "12+": 0.9
+        "unknown": 0.9
+      cer_threshold:
+        "3-4": 0.5
+        "5-7": 0.5
+        "8-11": 0.5
+        "12+": 0.5
+        "unknown": 0.5
+  train_manifest: "output/qwen_exp026/train_manifest.json"
+  val_manifest: "input/csrc-smoke/val_manifest.json"
+  max_duration_sec: 30.0
+augment:
+  spec_augment:
+    freq_masks: 1
+    freq_width: 15
+    time_masks: 1
+    time_width: 0.05
+    prob:
+      train: 0.5
+      talkbank: 0.2
+  speed_perturb: null
+optim:
+  lr: 1e-4
+  weight_decay: 0.01
+  optim_name: "adamw_torch"
+scheduler:
+  name: "linear"
+  warmup_ratio: 0.1
+wandb:
+  enabled: true
+  project: csrc
+  name: qwen_exp026

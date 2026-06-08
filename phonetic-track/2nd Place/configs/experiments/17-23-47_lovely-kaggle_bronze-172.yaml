@@ -1,0 +1,115 @@
+defaults:
+  - loss: ctc_loss_len_red
+debug: false
+data:
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+  test_jsonl: data/utterance_metadata.jsonl
+  audio_folder: data/audio
+  audio_processed_folder: data/audio_processed
+preprocessing:
+  sample_rate: 16000
+  max_duration_sec: 50
+  min_duration_sec: 0.22
+  sound_dimension: mono
+ema:
+  enabled: true
+  decay: 0.999
+  update_after_step: 100
+  update_every: 1
+cv:
+  holdout: true
+  n_folds: 5
+  splitter:
+    _target_: src.preprocessing.data_split.group_child_id_split
+    _partial_: true
+    n_splits: ${cv.n_folds}
+logging:
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+  use_random_name: true
+  project_name: debugging
+  save_dir: outputs
+device: cuda:0
+
+model:
+  decoder:
+    _target_: src.utils.decoder.GreedyDecoder
+  _target_: src.utils.models.Wav2Vec2CTC
+  pretrained_name: facebook/hubert-large-ll60k
+  classifier_dropout: 0.2635076763481
+  use_lora: false
+  lora_r: 16
+  lora_alpha: 64
+  lora_dropout: 0.0708234944101
+  augmentation: ${augmentation}
+  backbone_lr: ${training.backbone_lr}
+  head_lr: ${training.head_lr}
+  gradient_checkpointing: ${training.gradient_checkpointing}
+  LLA: true
+tokenizer:
+  _target_: src.preprocessing.phoneme_tokenizer.PhonemeTokenizer
+ssl_init:
+  enabled: false
+  # Option A (single path): set directly to a local HF backbone folder.
+  pretrained_name: null
+  # Option B (run root): auto-resolve fold_{k}/backbone_pretrained.
+  run_dir: null
+  backbone_subdir: backbone_pretrained
+training:
+  dataloader:
+    num_workers: 4
+    prefetch_factor: 4
+    pin_memory: true
+  num_epochs: 30
+  backbone_lr: 6.62631948884032e-05
+  head_lr: 0.0006776529616544655
+  lla_lr: 0.01
+  weight_decay: 0.01
+  optimizer:
+    _target_: torch.optim.AdamW
+  mixed_precision: true
+  gradient_checkpointing: false
+  early_stopping_patience: 5
+  freeze_backbone_epochs: 1
+  max_grad_norm: 1
+sampler:
+  train:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    max_batch_seconds: 30.0
+    bucket_size: 100
+    shuffle: true
+    drop_last: false
+  val:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    max_batch_seconds: 40.0
+    bucket_size: 100
+    shuffle: false
+    drop_last: false
+scheduler:
+  _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+  lr: ${training.backbone_lr}
+  init_lr_scale: 0.01
+  final_lr_scale: 0.01
+  phase_ratio:
+  - 0.1
+  - 0.4
+  - 0.5
+  total_steps: null
+augmentation:
+  time_stretch:
+    enabled: true
+    min_rate: 0.92
+    max_rate: 1.08
+    p: 0.3
+  pitch_shift:
+    enabled: true
+    min_semitones: -2.0
+    max_semitones: 1.5
+    p: 0.3
+  band_stop_filter:
+    enabled: false
+  masking:
+    enabled: true
+    mask_time_prob: 0.05
+    mask_feature_prob: 0.0

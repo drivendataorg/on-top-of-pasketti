@@ -1,0 +1,22 @@
+# Augmentation: NONE
+# All waveform augmentations disabled.
+# Equivalent to: augmentation: dummy
+time_stretch:
+  enabled: false
+pitch_shift:
+  enabled: false
+band_stop_filter:
+  enabled: false
+
+masking:
+  enabled: false
+  mask_time_prob: 0.0
+  mask_feature_prob: 0.0
+  mask_time_length: 10
+  mask_feature_length: 10
+
+white_noise: 
+  enabled: false
+
+background_noise: 
+  enabled: false

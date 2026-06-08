@@ -1,0 +1,101 @@
+# This is a template showing all available options
+defaults:
+  - _self_
+  - decoder@model.decoder: greedy  # Maps configs/decoder/greedy.yaml -> cfg.model.decoder
+  - tokenizer: phoneme
+  - model: wav2vec2_ctc
+  - loss: focal_ctc_loss
+  - training: wav2vec2-base
+  - sampler: duration
+  - scheduler: tri_stage_differential
+  - augmentation: high
+
+# Hydra configuration for output directory structure
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+# Debug mode: limit training data to first 2000 samples
+debug: false
+
+# Data paths
+data:
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+  word_train_jsonl: data/train_word_transcripts.jsonl
+  word_train_jsonl_talkbank: data/train_word_transcripts_talkbank.jsonl
+  train_jsonl_speechocean: data/train_phon_transcripts_speechocean.jsonl
+  train_jsonl_ultrasuite: data/train_phon_transcripts_ultrasuite.jsonl
+  train_jsonl_darpa: data/train_phon_transcripts_darpa_timit.jsonl
+  test_jsonl: data/utterance_metadata.jsonl
+  audio_folder: data/audio
+  audio_processed_folder: data/audio_processed  # Preprocessed .npy cache; set to null to disable
+  removed_utterances_jsonl: data/removed_utterance_ids_fold1.jsonl
+  remove_bad_data: false
+  train_on_all_data: false  # Skip CV split, train on all data (no validation)
+
+pretraining:
+  enabled: false
+  # Epochs per external-data stage.
+  num_epochs: 2
+  groups:
+    - name: less_similar_external
+      jsonl_paths:
+        - ${data.train_jsonl_speechocean}
+        - ${data.train_jsonl_darpa}
+    - name: similar_external
+      jsonl_paths:
+        - ${data.train_jsonl_ultrasuite}
+
+
+preprocessing:
+  sample_rate: 16000
+  max_duration_sec: 50
+  min_duration_sec: 0.22
+  sound_dimension: "mono" # options: "mono" "stereo". Code currently only supports mono
+
+ssl_init:
+  enabled: false
+  # Option A (single path): set directly to a local HF backbone folder.
+  pretrained_name: null
+  # Option B (run root): auto-resolve fold_{k}/backbone_pretrained.
+  run_dir: null
+  backbone_subdir: backbone_pretrained
+
+ema:
+  enabled: true
+  decay: 0.999
+  update_after_step: 100
+  update_every: 1
+
+# Cross-validation
+cv:
+  holdout: true # if true, will use test set as holdout instead of CV folds
+  n_folds: 5
+  # random_seed: 4256
+  splitter:
+    _target_: src.preprocessing.data_split.group_child_id_split
+    _partial_: true
+    n_splits: ${cv.n_folds}
+    
+# Logging
+logging:
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+  use_random_name: true
+  project_name: debugging
+  save_dir: outputs
+  save_val_logits_best: true
+
+# Device
+device: cuda:0
+
+mtl:
+  enabled: false
+  alternate_batches: true
+  word_tokenizer:
+    _target_: src.preprocessing.word_char_tokenizer.WordCharTokenizer
+ 

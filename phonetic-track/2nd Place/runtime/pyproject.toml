@@ -1,0 +1,62 @@
+[project]
+name = "runtime"
+version = "0"
+description = "Add your description here"
+requires-python = "~=3.11.13"
+dependencies = [
+    "cuda-python>=12.6",
+    "english-to-ipa @ git+https://github.com/mphilli/English-to-IPA",
+    "flashlight-text==0.0.4",
+    "kenlm @ https://github.com/kpu/kenlm/archive/master.zip",
+    "librosa",
+    "loguru",
+    "nemo_toolkit[asr]>=2.5.0",
+    "peft",
+    "pyctcdecode==0.5.0",
+    "qwen-asr[vllm]",
+    "sacrebleu", # Needed for NeMo SpeechLM2
+    # NOTE: vLLM's dependency chain (flashinfer -> nvidia-cutlass-dsl) declares a
+    # cuda-python pin higher than what the competition runtime ships. We override
+    # cuda-python to >=12.6 below. vLLM inference works correctly on CUDA 12.6 in
+    # practice, but not all models or features have been verified under this
+    # configuration. Test thoroughly on the target hardware.
+    "vllm>=0.14.0",
+    "soundfile",
+    "transformers[torch]>=4.52.4",
+    "torch>=2.9.0",
+    "torchaudio",
+    "torchcodec",
+    "tqdm",
+    "tensorflow==2.15.0",
+    "keras==2.15.0",
+    "pandas"
+]
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[tool.uv]
+required-version = ">=0.9.24"
+environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'"
+]
+
+# Override constraints to allow qwen-asr without breaking existing packages
+override-dependencies = [
+    "transformers>=4.57.6,<4.58",  # NeMo pins <4.54, qwen-asr needs >=4.57.6
+    "pillow>=12",                   # Prevent gradio 3.x from downgrading pillow
+    "protobuf>=5.29.5,<5.30",       # Keep 5.29.x: nemo needs <5.30, wandb pb2 files incompatible with 6.x+; vllm inference works at runtime
+    "cuda-python>=12.6",            # Relax nvidia-cutlass-dsl's upstream pin; 12.6 works at runtime
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true

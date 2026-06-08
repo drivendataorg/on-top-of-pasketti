@@ -1,0 +1,13 @@
+dataloader:
+  batch_size: 4
+  num_workers: 2
+  pin_memory: true
+num_epochs: 20
+backbone_lr: 4.18528766e-05
+head_lr: 1.97164085e-05
+weight_decay: 6.3559617e-06
+optimizer:
+  _target_: torch.optim.AdamW
+mixed_precision: true
+early_stopping_patience: 5
+freeze_backbone_epochs: 0

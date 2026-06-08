@@ -1,0 +1,29 @@
+v17.backbone-wavlm-large.ep3.5.leval
+#v17.backbone-wavlm-large.leval
+#v17.tdt_only.leval
+#v17.leval
+#v16.backbone-wavlm-large.dual_bpe.mix4.ep3.eval
+## load best
+v16.backbone-wavlm-large.dual_bpe.mix4.eval
+## load last
+v16.backbone-wavlm-large.dual_bpe.mix4.mix_csss.ep4.5.eval
+#v16.backbone-wavlm-large.dual_bpe.mix4.mix_csss.ep4.eval
+## load best
+v16.backbone-wavlm-large.dual_bpe.eval
+v16.dual_bpe.tdt_only.eval
+#v16.backbone-parakeet-tdt-1.1b.dual_bpe.tdt_only.eval
+v16.dual_bpe.mix_csss.tdt_only.eval
+#v16.dual_bpe.tdt4.eval
+v16.dual_bpe.mix2.mix_csss.tdt_only.eval
+#v15.mix4.eval
+#v16.dual_bpe.mix_csss
+#v16.dual_bpe.mix2.mix_csss
+v16.dual_bpe.wo_scale-2.eval
+v16.aux_loss.dual_bpe.eval
+v16.dual_bpe.mix4.eval
+#v16.dual_bpe.pls-0.1.eval
+##v15.dual_bpe.eval
+#v16.dual_bpe.eval
+v16.dual_bpe.mix2.eval
+#v15.dual_char.eval
+#v16.dual_char.mix4.eval

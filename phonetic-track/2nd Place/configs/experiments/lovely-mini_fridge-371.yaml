@@ -1,0 +1,165 @@
+debug: false
+data:
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+  word_train_jsonl: data/train_word_transcripts.jsonl
+  word_train_jsonl_talkbank: data/train_word_transcripts_talkbank.jsonl
+  train_jsonl_speechocean: data/train_phon_transcripts_speechocean.jsonl
+  train_jsonl_ultrasuite: data/train_phon_transcripts_ultrasuite.jsonl
+  train_jsonl_darpa: data/train_phon_transcripts_darpa_timit.jsonl
+  test_jsonl: data/utterance_metadata.jsonl
+  audio_folder: data/audio
+  audio_processed_folder: data/audio_processed
+  removed_utterances_jsonl: data/removed_utterance_ids_fold1.jsonl
+  remove_bad_data: false
+pretraining:
+  enabled: false
+  num_epochs: 2
+  groups:
+  - name: less_similar_external
+    jsonl_paths:
+    - ${data.train_jsonl_speechocean}
+    - ${data.train_jsonl_darpa}
+  - name: similar_external
+    jsonl_paths:
+    - ${data.train_jsonl_ultrasuite}
+preprocessing:
+  sample_rate: 16000
+  max_duration_sec: 50
+  min_duration_sec: 0.22
+  sound_dimension: mono
+ssl_init:
+  enabled: false
+  pretrained_name: null
+  run_dir: null
+  backbone_subdir: backbone_pretrained
+ema:
+  enabled: true
+  decay: 0.999
+  update_after_step: 100
+  update_every: 1
+cv:
+  holdout: true
+  n_folds: 5
+  splitter:
+    _target_: src.preprocessing.data_split.group_child_id_split
+    _partial_: true
+    n_splits: ${cv.n_folds}
+logging:
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+  use_random_name: true
+  project_name: smac_ssl_sweep_v2
+  save_dir: outputs
+  save_val_logits_best: true
+device: cuda:0
+mtl:
+  enabled: false
+  alternate_batches: true
+  word_tokenizer:
+    _target_: src.preprocessing.word_char_tokenizer.WordCharTokenizer
+model:
+  decoder:
+    _target_: src.utils.decoder.GreedyDecoder
+  _target_: src.utils.models.Wav2Vec2CTC
+  pretrained_name: microsoft/wavlm-large
+  classifier_dropout: 0.029476046524
+  use_lora: false
+  lora_r: 16
+  lora_alpha: 64
+  lora_dropout: 0.0708234944101
+  augmentation: ${augmentation}
+  backbone_lr: ${training.backbone_lr}
+  head_lr: ${training.head_lr}
+  gradient_checkpointing: ${training.gradient_checkpointing}
+  LLA: false
+  enable_age_head: true
+  age_head_lambda: 0.1
+tokenizer:
+  _target_: src.preprocessing.phoneme_tokenizer.PhonemeTokenizer
+loss:
+  _target_: src.utils.loss.FocalCTCLoss
+  gamma: 0.2135779965701
+  alpha: null
+training:
+  dataloader:
+    num_workers: 4
+    prefetch_factor: 4
+    pin_memory: true
+  num_epochs: 15
+  guard_epochs: 3
+  guard_PER: 0.29
+  backbone_lr: 3.27679772e-05
+  head_lr: 0.0007637745179
+  lla_lr: 0.01
+  weight_decay: 2.38061058e-05
+  max_grad_norm: 10.0
+  optimizer:
+    _target_: torch.optim.AdamW
+  mixed_precision: true
+  gradient_checkpointing: false
+  early_stopping_patience: 3
+  freeze_backbone_epochs: 1
+sampler:
+  train:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    max_batch_seconds: 30.0
+    bucket_size: 100
+    shuffle: true
+    drop_last: false
+  val:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    max_batch_seconds: 40.0
+    bucket_size: 100
+    shuffle: false
+    drop_last: false
+scheduler:
+  backbone:
+    _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+    lr: ${training.backbone_lr}
+    init_lr_scale: 0.01
+    final_lr_scale: 0.01
+    phase_ratio:
+    - 0.044
+    - 0.392
+    - 0.564
+  head:
+    _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+    lr: ${training.head_lr}
+    init_lr_scale: 0.01
+    final_lr_scale: 0.01
+    phase_ratio:
+    - 0.0141
+    - 0.4164
+    - 0.5695
+augmentation:
+  time_stretch:
+    enabled: true
+    min_rate: 0.8
+    max_rate: 1.2
+    p: 0.7832338213626
+  pitch_shift:
+    enabled: true
+    min_semitones: -4.0
+    max_semitones: 3.0
+    p: 0.414561434758
+  band_stop_filter:
+    enabled: true
+    min_center_freq: 200.0
+    max_center_freq: 4000.0
+    min_bandwidth_fraction: 0.5
+    max_bandwidth_fraction: 1.99
+    p: 0.4
+  masking:
+    enabled: true
+    mask_time_prob: 0.1
+    mask_feature_prob: 0.05
+    mask_time_length: 10
+    mask_feature_length: 10
+  white_noise:
+    enabled: false
+  background_noise:
+    enabled: true
+    snr_min: 5
+    snr_max: 10
+    p: 0.5

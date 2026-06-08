@@ -1,0 +1,36 @@
+program: src/run_pipeline.py
+entity: speech-phonetic-track
+project: hubert_large_sweep
+
+method: random
+metric:
+  goal: minimize
+  name: cv/mean_val_per
+
+parameters:
+
+  training.backbone_lr:
+    distribution: log_uniform_values
+    max: 2e-4
+    min: 2e-5
+  training.head_lr:
+    distribution: log_uniform_values
+    max: 5e-3
+    min: 5e-4
+  model.use_lora:
+    values: [false]
+  model.LLA:
+    values: [false]
+  loss:
+    values: ["ctc_loss_batch_red","ctc_loss_len_red","focal_ctc_loss"]
+  training.num_epochs:
+    value: 20
+command:
+  - uv
+  - run
+  - ${program}
+  - --config-dir
+  - configs/experiments 
+  - --config-name
+  - 17-23-47_lovely-kaggle_bronze-172
+  - ${args_no_hyphens}
