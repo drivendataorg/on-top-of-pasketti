@@ -1,0 +1,32 @@
+program: src/run_pipeline.py
+entity: speech-phonetic-track
+project: wavlm_large_sweep
+
+method: random
+metric:
+  goal: minimize
+  name: cv/mean_val_per
+
+parameters:
+
+  training.backbone_lr:
+    distribution: log_uniform_values
+    max: 2e-4
+    min: 2e-5
+  training.head_lr:
+    distribution: log_uniform_values
+    max: 5e-3
+    min: 5e-4
+  model.use_lora:
+    values: [true, false]
+  model.LLA:
+    values: [true, false]
+
+command:
+  - uv
+  - run
+  - ${program}
+  - --config-name
+  - default
+  - model.pretrained_name=microsoft/wavlm-large
+  - ${args_no_hyphens}

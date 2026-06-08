@@ -1,0 +1,6 @@
+_target_: src.utils.decoder.PyCTCDecoder
+beam_width: 15
+kenlm_model_path: phoneme_lm.arpa      # set to null to disable LM
+unigrams_path: phoneme_unigrams.txt     # set to null to skip unigram list
+alpha: 0.6    # LM weight — keep moderate for children's mispronunciations
+beta: 1.0     # word-insertion bonus — tuned for short ~2s utterances

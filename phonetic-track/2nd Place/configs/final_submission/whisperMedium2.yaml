@@ -1,0 +1,151 @@
+augmentation:
+  background_noise:
+    enabled: true
+    p: 0.5
+    snr_max: 10
+    snr_min: 5
+  band_stop_filter:
+    enabled: true
+    max_bandwidth_fraction: 1.99
+    max_center_freq: 4000
+    min_bandwidth_fraction: 0.5
+    min_center_freq: 200
+    p: 0.4
+  masking:
+    enabled: true
+    mask_feature_length: 10
+    mask_feature_prob: 0.05
+    mask_time_length: 10
+    mask_time_prob: 0.1
+  pitch_shift:
+    enabled: true
+    max_semitones: 3
+    min_semitones: -4
+    p: 0.6268558377456338
+  time_stretch:
+    enabled: true
+    max_rate: 1.2
+    min_rate: 0.8
+    p: 0.31374895084272186
+  white_noise:
+    enabled: false
+cv:
+  holdout: true
+  n_folds: 5
+  splitter:
+    _partial_: true
+    _target_: src.preprocessing.data_split.group_child_id_split
+    n_splits: 5
+data:
+  audio_folder: data/audio
+  audio_processed_folder: data/audio_processed
+  remove_bad_data: false
+  removed_utterances_jsonl: data/removed_utterance_ids_fold1.jsonl
+  test_jsonl: data/utterance_metadata.jsonl
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_darpa: data/train_phon_transcripts_darpa_timit.jsonl
+  train_jsonl_speechocean: data/train_phon_transcripts_speechocean.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+  train_jsonl_ultrasuite: data/train_phon_transcripts_ultrasuite.jsonl
+  train_on_all_data: false
+  word_train_jsonl: data/train_word_transcripts.jsonl
+  word_train_jsonl_talkbank: data/train_word_transcripts_talkbank.jsonl
+debug: false
+device: cuda:0
+ema:
+  decay: 0.999
+  enabled: true
+  update_after_step: 100
+  update_every: 1
+logging:
+  project_name: debugging
+  save_dir: outputs
+  save_val_logits_best: true
+  use_random_name: true
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+loss:
+  _target_: src.utils.loss.FocalCTCLoss
+  alpha: null
+  gamma: 0.2526900639985685
+model:
+  classifier_dropout: 0.031260864160464925
+  enable_age_head: true
+  whisper_model_id: openai/whisper-medium
+mtl:
+  alternate_batches: true
+  enabled: false
+  word_tokenizer:
+    _target_: src.preprocessing.word_char_tokenizer.WordCharTokenizer
+preprocessing:
+  max_duration_sec: 50
+  min_duration_sec: 0.22
+  sample_rate: 16000
+  sound_dimension: mono
+pretraining:
+  enabled: false
+  groups:
+  - jsonl_paths:
+    - data/train_phon_transcripts_speechocean.jsonl
+    - data/train_phon_transcripts_darpa_timit.jsonl
+    name: less_similar_external
+  - jsonl_paths:
+    - data/train_phon_transcripts_ultrasuite.jsonl
+    name: similar_external
+  num_epochs: 2
+sampler:
+  train:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    bucket_size: 100
+    drop_last: false
+    max_batch_seconds: 30
+    shuffle: true
+  val:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    bucket_size: 100
+    drop_last: false
+    max_batch_seconds: 40
+    shuffle: false
+scheduler:
+  backbone:
+    _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+    final_lr_scale: 0.01
+    init_lr_scale: 0.01
+    lr: 9.96612140982302e-06
+    phase_ratio:
+    - 0.05
+    - 0.3
+    - 0.695
+  head:
+    _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+    final_lr_scale: 0.01
+    init_lr_scale: 0.01
+    lr: 0.00028584523200482416
+    phase_ratio:
+    - 0.01
+    - 0.32
+    - 0.679
+ssl_init:
+  backbone_subdir: backbone_pretrained
+  enabled: false
+  pretrained_name: null
+  run_dir: null
+tokenizer:
+  _target_: src.preprocessing.phoneme_tokenizer.PhonemeTokenizer
+training:
+  backbone_lr: 9.96612140982302e-06
+  head_lr: 0.00028584523200482416
+  max_grad_norm: 10
+  num_epochs: 15
+  weight_decay: 1.3708160623653782e-05
+  dataloader:
+    num_workers: 6
+    pin_memory: true
+    prefetch_factor: 2
+  freeze_backbone_epochs: 1
+  gradient_checkpointing: true
+  guard_PER: 0.31
+  guard_epochs: 2
+  mixed_precision: true
+  optimizer:
+    _target_: torch.optim.AdamW

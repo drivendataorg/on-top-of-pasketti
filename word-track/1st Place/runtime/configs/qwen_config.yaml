@@ -1,0 +1,7 @@
+model:
+  type: "qwen"
+  name_or_path: "qwen_exp022_023_025_026_model_avg"
+  batch_size: 64
+  language: "English"
+  max_new_tokens: 300
+  max_inference_batch_size: 32

@@ -1,0 +1,36 @@
+# Augmentation: LOW
+# Gentle waveform augmentations — small perturbations only.
+# Good baseline to test if any augmentation helps at all.
+time_stretch:
+  enabled: true
+  min_rate: 0.92
+  max_rate: 1.08
+  p: 0.3
+
+pitch_shift:
+  enabled: true
+  min_semitones: -2.0
+  max_semitones: 1.5
+  p: 0.3
+
+band_stop_filter:
+  enabled: false
+
+masking:
+  enabled: true
+  mask_time_prob: 0.05
+  mask_feature_prob: 0.0
+  mask_time_length: 10
+  mask_feature_length: 10
+
+
+white_noise: 
+  enabled: true
+  min_amplitude: 0.001
+  max_amplitude: 0.015
+  p: 0.5
+
+
+background_noise: 
+  enabled: false
+

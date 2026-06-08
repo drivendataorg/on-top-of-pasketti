@@ -1,0 +1,5 @@
+--flagfile=flags/v15
+--aug_classroom_noise
+--aug_classroom_snr_min=20
+--aug_classroom_snr_max=40
+

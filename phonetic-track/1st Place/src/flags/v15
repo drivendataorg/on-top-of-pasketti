@@ -1,0 +1,13 @@
+--flagfile=flags/v14-ema5-shuffle
+--folds=5
+--ep=50
+--eval_bs=32
+--patience=4
+--ext_eval_group
+--sgkf_compat=1.8.0
+--eval_ext_full=1
+--eval_ext_weight=1
+--sie=0.25
+--vie=0.5
+#--metric2=score/dd
+

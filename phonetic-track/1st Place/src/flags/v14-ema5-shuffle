@@ -1,0 +1,7 @@
+# same as v14-ema2 but random augmix
+--flagfile=flags/v14-ema
+--lr=3e-5
+--aug_mix_same_child=0
+#--aug_mix_same_source 
+--aug_mix_shuffle
+

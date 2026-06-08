@@ -1,0 +1,35 @@
+# Core ASR
+torch==2.4.0
+torchaudio==2.4.0
+nemo-toolkit[asr]==2.1.0
+transformers==4.47.0
+safetensors
+
+# Audio
+librosa
+soundfile
+jiwer
+editdistance
+
+# Tree reranker
+catboost
+lightgbm
+
+# Training & utilities
+absl-py
+icecream
+loguru
+huggingface_hub
+pandas
+numpy
+scipy
+tqdm
+scikit-learn
+peft
+sentencepiece
+joblib
+pyyaml
+
+# Notebook (optional, for the demo notebook)
+jupyterlab
+ipykernel

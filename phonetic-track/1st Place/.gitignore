@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.venv/
+.ipynb_checkpoints/
+working/
+models/*
+!models/.gitkeep
+*.zip
+*.tar.gz
+*.nemo
+*.pt
+*.bin
+*.safetensors

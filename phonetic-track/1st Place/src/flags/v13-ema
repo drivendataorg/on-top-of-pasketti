@@ -1,0 +1,7 @@
+--flagfile=flags/v13 
+--ema_train 
+--ema_start_epoch=1
+--ema_decay=0.999
+--warmup_ratio=0
+--warmup_epochs=0
+--lr=2e-5

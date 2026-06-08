@@ -1,0 +1,81 @@
+model_name_or_path: "nvidia/parakeet-tdt-0.6b-v2"
+output_dir: "output/parakeet_exp013/"
+
+# Adapter設定
+adapter:
+  enabled: true
+  adapter_name: "child_speech"
+  adapter_module_name: "encoder"
+  dim: 64
+  activation: "swish"
+  norm_position: "pre"
+  dropout: 0.0
+  stochastic_depth: 0.0
+  l2_lambda: 0.0
+
+# フィルタ設定（年齢別CER閾値）
+filter:
+  cer_threshold:
+    "3-4": null
+    "5-7": null
+    "8-11": null
+
+disable_spec_augment: true  # Adapter訓練時はSpecAugment不要
+
+# 学習パラメータ
+max_epochs: 3
+max_steps: null
+batch_size: 4
+val_batch_size: 16
+precision: "bf16-mixed"
+freeze_encoder_epochs: 0
+freeze_encoder_steps: null
+gradient_clip_val: 1.0
+num_workers: 4
+accumulate_grad_batches: 1
+val_check_interval: 2500
+
+data:
+  train_sources:
+    - csv: "input/csrc-processed-input/train.csv"
+      audio_dir: "input/csrc-processed-input/audio"
+      cer_threshold:
+        "3-4": null
+        "5-7": null
+        "8-11": null
+    - csv: "input/csrc-processed-talkbank/train.csv"
+      audio_dir: "input/csrc-processed-talkbank/audio"
+      cer_threshold:
+        "3-4": null
+        "5-7": null
+        "8-11": null
+        "12+": null
+        "unknown": null
+  train_manifest: "output/parakeet_exp013/train_manifest.json"
+  val_manifest: "input/csrc-smoke/val_manifest.json"
+
+# IPA正規化
+ipa_normalize:
+  enabled: true
+
+# Optimizer (Adapter用: 高めのlr, weight_decay=0)
+optim:
+  lr: 1.0e-3
+  weight_decay: 0.0
+
+# LR Scheduler
+scheduler:
+  name: "InverseSquareRootAnnealing"
+  warmup_steps: 5000
+  min_lr: 5.0e-6
+
+lhotse:
+  batch_duration: 30.0
+  quadratic_duration: 15.0
+  use_bucketing: true
+  num_buckets: 30
+
+wandb:
+  enabled: true
+  project: csrc
+  name: null

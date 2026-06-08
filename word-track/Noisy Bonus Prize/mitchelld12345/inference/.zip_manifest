@@ -1,0 +1,5 @@
+main.py
+config.yaml
+silero_vad/
+qwen_model/
+VERSION

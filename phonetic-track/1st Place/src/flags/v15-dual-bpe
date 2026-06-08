@@ -1,0 +1,2 @@
+--flagfile=flags/v15-dual-char
+--word_ctc_bpe

@@ -1,0 +1,141 @@
+defaults:
+  - _self_
+  - loss: ctc_loss_len_red
+
+augmentation:
+  band_stop_filter:
+    enabled: false
+  masking:
+    enabled: true
+    mask_feature_prob: 0
+    mask_time_prob: 0.05
+  pitch_shift:
+    enabled: true
+    max_semitones: 1.5
+    min_semitones: -2
+    p: 0.3
+  time_stretch:
+    enabled: true
+    max_rate: 1.08
+    min_rate: 0.92
+    p: 0.3
+cv:
+  holdout: true
+  n_folds: 5
+  splitter:
+    _partial_: true
+    _target_: src.preprocessing.data_split.group_child_id_split
+    n_splits: 5
+data:
+  audio_folder: data/audio
+  audio_processed_folder: data/audio_processed
+  test_jsonl: data/utterance_metadata.jsonl
+  train_jsonl: data/train_phon_transcripts.jsonl
+  train_jsonl_talkbank: data/train_phon_transcripts_talkbank.jsonl
+debug: false
+device: cuda:0
+ema:
+  decay: 0.999
+  enabled: true
+  update_after_step: 100
+  update_every: 1
+logging:
+  project_name: debugging
+  save_dir: outputs
+  use_random_name: true
+  use_wandb: true
+  wandb_entity: speech-phonetic-track
+model:
+  _target_: src.utils.models.Wav2Vec2CTC
+  LLA: false
+  augmentation:
+    band_stop_filter:
+      enabled: false
+    masking:
+      enabled: true
+      mask_feature_prob: 0
+      mask_time_prob: 0.05
+    pitch_shift:
+      enabled: true
+      max_semitones: 1.5
+      min_semitones: -2
+      p: 0.3
+    time_stretch:
+      enabled: true
+      max_rate: 1.08
+      min_rate: 0.92
+      p: 0.3
+  backbone_lr: 2.365381697510727e-05
+  classifier_dropout: 0.2635076763481
+  decoder:
+    _target_: src.utils.decoder.GreedyDecoder
+  gradient_checkpointing: false
+  head_lr: 0.004243618562953039
+  lora_alpha: 64
+  lora_dropout: 0.0708234944101
+  lora_r: 16
+  pretrained_name: facebook/hubert-large-ll60k
+  use_lora: false
+preprocessing:
+  max_duration_sec: 50
+  min_duration_sec: 0.22
+  sample_rate: 16000
+  sound_dimension: mono
+pretraining:
+  enabled: false
+  groups:
+  - jsonl_paths:
+    - data/train_phon_transcripts_speechocean.jsonl
+    - data/train_phon_transcripts_darpa_timit.jsonl
+    name: less_similar_external
+  - jsonl_paths:
+    - data/train_phon_transcripts_ultrasuite.jsonl
+    name: similar_external
+  num_epochs: 2
+sampler:
+  train:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    bucket_size: 100
+    drop_last: false
+    max_batch_seconds: 30
+    shuffle: true
+  val:
+    _target_: src.preprocessing.dataset.DurationBatchSampler
+    bucket_size: 100
+    drop_last: false
+    max_batch_seconds: 40
+    shuffle: false
+scheduler:
+  _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+  final_lr_scale: 0.01
+  init_lr_scale: 0.01
+  lr: 2.365381697510727e-05
+  phase_ratio:
+  - 0.1
+  - 0.4
+  - 0.5
+  total_steps: null
+ssl_init:
+  backbone_subdir: backbone_pretrained
+  enabled: true
+  pretrained_name: outputs/ssl/17-56-26_ssl_hubert_08/fold_1/backbone_pretrained
+  run_dir: null
+tokenizer:
+  _target_: src.preprocessing.phoneme_tokenizer.PhonemeTokenizer
+training:
+  backbone_lr: 2.365381697510727e-05
+  dataloader:
+    num_workers: 4
+    pin_memory: true
+    prefetch_factor: 4
+  early_stopping_patience: 5
+  freeze_backbone_epochs: 1
+  gradient_checkpointing: false
+  head_lr: 0.004243618562953039
+  lla_lr: 0.01
+  max_grad_norm: 1
+  mixed_precision: true
+  num_epochs: 15
+  optimizer:
+    _target_: torch.optim.AdamW
+  weight_decay: 0.01

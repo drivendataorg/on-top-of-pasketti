@@ -1,0 +1,101 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# wheels
+*.whl
+
+bundle.zip
+src/offline_wheels
+
+# Data
+data/audio/
+data/audio_processed/
+data/noise/
+outputs/
+smac3_output/
+submission/
+# runtime/
+*.parquet
+*.jsonl
+*.wav
+*.WAV
+wav2vec2-base/
+wandb/
+/cache
+/artifacts
+*.log
+*.json
+*.pkl
+*.ckpt
+*.h5
+*.pt
+*.pth
+*.bin
+src/optimize_decoder/
+!src/optimize_decoder/rover.py
+offline_wheels/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.gz
+*.zip
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/

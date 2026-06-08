@@ -1,0 +1,8 @@
+defaults:
+  - /default
+  - override /model: wav2vec2_mtl
+  - override /training: wav2vec2_mtl
+
+mtl:
+  enabled: true
+  alternate_batches: true

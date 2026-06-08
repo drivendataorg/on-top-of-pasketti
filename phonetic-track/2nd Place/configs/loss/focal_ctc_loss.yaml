@@ -1,0 +1,3 @@
+_target_: src.utils.loss.FocalCTCLoss
+gamma: 0.5
+alpha: null

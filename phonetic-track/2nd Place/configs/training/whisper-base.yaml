@@ -1,0 +1,18 @@
+dataloader:
+  num_workers: 6
+  prefetch_factor: 2
+  pin_memory: true
+num_epochs: 24
+guard_epochs: 2
+guard_PER: 0.28
+backbone_lr: 8e-6
+head_lr: 2e-4
+lla_lr: 1e-2
+weight_decay: 1e-2
+max_grad_norm: 1.0
+optimizer:
+  _target_: torch.optim.AdamW
+mixed_precision: true
+gradient_checkpointing: true
+early_stopping_patience: 2
+freeze_backbone_epochs: 1

@@ -1,0 +1,12 @@
+train:
+  _target_: src.preprocessing.dataset.DurationBatchSampler
+  max_batch_seconds: 30.0
+  bucket_size: 100
+  shuffle: true
+  drop_last: false
+val:
+  _target_: src.preprocessing.dataset.DurationBatchSampler
+  max_batch_seconds: 40.0
+  bucket_size: 100
+  shuffle: false
+  drop_last: false

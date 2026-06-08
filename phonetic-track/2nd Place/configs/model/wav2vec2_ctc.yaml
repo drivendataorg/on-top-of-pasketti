@@ -1,0 +1,14 @@
+_target_: src.utils.models.Wav2Vec2CTC
+pretrained_name: microsoft/wavlm-base-plus
+classifier_dropout: 0.2635076763481
+use_lora: false
+lora_r: 16
+lora_alpha: 64
+lora_dropout: 0.0708234944101
+augmentation: ${augmentation}
+backbone_lr: ${training.backbone_lr}
+head_lr: ${training.head_lr}
+gradient_checkpointing: ${training.gradient_checkpointing}
+LLA: False
+enable_age_head: false
+age_head_lambda: 0.1

@@ -1,0 +1,69 @@
+program: src/run_pipeline.py
+entity: speech-phonetic-track
+project: whisper_medium_final_runs
+
+method: random
+metric:
+  goal: minimize
+  name: cv/mean_val_per
+
+parameters:
+
+#LR's:
+  training.backbone_lr:
+    distribution: log_uniform_values
+    max: 2e-5
+    min: 6e-6
+  training.head_lr:
+    distribution: log_uniform_values
+    max: 5e-4
+    min: 1e-4
+  training.weight_decay:
+    distribution: log_uniform_values
+    max: 1e-4
+    min: 1e-5
+  loss.gamma:
+    distribution: uniform
+    max: 0.5
+    min: 0.2
+  training.max_grad_norm:
+    values: [1, 5, 10]
+  model.classifier_dropout:
+    distribution: uniform
+    max: 0.15
+    min: 0.01
+  model.enable_age_head:
+    values: [true]
+  augmentation.time_stretch.p:
+    distribution: uniform
+    max: 0.5
+    min: 0.0
+  augmentation.pitch_shift.p:
+    distribution: uniform
+    max: 0.9
+    min: 0.6
+  scheduler.head.phase_ratio:
+    value: "[0.01, 0.32, 0.679]"
+  scheduler.backbone.phase_ratio:
+    value: "[0.05, 0.3, 0.695]"
+#augmentation:
+#freeze_backbone_epochs:
+  model:
+    values: ["whisper_ctc"] # 
+  training:
+    values: ["whisper-base"] # 
+  model.whisper_model_id:
+    values: ["openai/whisper-medium"]
+  training.num_epochs:
+    value: 15
+  training.guard_PER:
+    value: 0.31
+
+
+command:
+  - uv
+  - run
+  - ${program}
+  - --config-name
+  - default
+  - ${args_no_hyphens}

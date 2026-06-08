@@ -1,0 +1,2 @@
+_target_: src.utils.decoder.BeamSearchDecoder
+beam_width: 15

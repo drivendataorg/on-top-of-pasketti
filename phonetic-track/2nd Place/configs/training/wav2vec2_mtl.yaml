@@ -1,0 +1,17 @@
+dataloader:
+  num_workers: 4
+  prefetch_factor: 4
+  pin_memory: true
+num_epochs: 30
+backbone_lr: 2e-5
+head_lr: 5e-4
+lla_lr: 1e-2
+weight_decay: 1e-2
+optimizer:
+  _target_: torch.optim.AdamW
+loss:
+  _target_: src.utils.loss.CTCLoss
+mixed_precision: true
+gradient_checkpointing: false
+early_stopping_patience: 5
+freeze_backbone_epochs: 0

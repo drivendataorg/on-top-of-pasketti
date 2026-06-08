@@ -1,0 +1,41 @@
+jupyterlab
+ipywidgets
+matplotlib
+pysocks
+socksio
+tqdm
+psutil
+
+
+pandas==2.3.3
+scikit-learn==1.8.0
+librosa==0.11.0
+jiwer==4.0.0
+peft==0.18.1
+tensorboard==2.20.0
+albumentations==2.0.8
+#epitran==1.34.0
+#eng_to_ipa==0.0.2
+audiomentations==0.43.1
+pandarallel==1.6.5
+
+# qwtts
+onnxruntime==1.24.2
+#pyctcdecode==0.5.0 # it use lower version of numpy!!!!
+
+# vllm-omni
+aenum==3.1.16
+
+
+# nemo asr
+#hydra-core==1.3.2
+#lightning==2.6.1
+#wrapt==2.1.1
+#wget==3.2
+#onnx==1.20.1
+#fiddle==0.3.0
+#nv-one-logger-core==2.3.1
+#nv-one-logger-training-telemetry==2.3.1
+#nv-one-logger-pytorch-lightning-integration==2.3.1
+
+

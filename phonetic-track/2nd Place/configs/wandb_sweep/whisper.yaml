@@ -1,0 +1,39 @@
+program: src/run_pipeline.py
+entity: speech-phonetic-track
+project: whisper_base_sweep
+
+method: random
+metric:
+  goal: minimize
+  name: cv/mean_val_per
+
+parameters:
+  training.backbone_lr:
+    distribution: log_uniform_values
+    max: 2e-5
+    min: 2e-6
+  training.head_lr:
+    distribution: log_uniform_values
+    max: 1e-4
+    min: 1e-6
+  model.whisper_model_id:
+    values: ["openai/whisper-large-v3"]
+  augmentation:
+    values: ["none", "high"]
+  model:
+    values: ["whisper_ctc"] # 
+  training:
+    values: ["whisper-base"] # 
+  training.num_epochs:
+    value: 6
+  training.early_stopping_patience:
+    value: 1
+  loss:
+    values: ["focal_ctc_loss", "ctc_loss_len_red"]
+command:
+  - uv
+  - run
+  - ${program}
+  - --config-name
+  - default
+  - ${args_no_hyphens}

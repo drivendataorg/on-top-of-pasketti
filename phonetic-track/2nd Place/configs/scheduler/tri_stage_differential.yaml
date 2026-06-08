@@ -1,0 +1,15 @@
+# Tri-stage LR schedulers per-group (backbone + head) — stepped every batch
+backbone:
+  _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+  lr: ${training.backbone_lr}
+  init_lr_scale: 0.01 # scheduler starts lr from init_lr_scale*lr
+  final_lr_scale: 0.01 # scheduler ends lr at final_lr_scale*lr
+  phase_ratio: [0.1, 0.4, 0.5]
+
+head:
+  _target_: src.utils.tri_stage_lr_scheduler.TriStageLRScheduler
+  lr: ${training.head_lr}
+  init_lr_scale: 0.01 # scheduler starts lr from init_lr_scale*lr
+  final_lr_scale: 0.01 # scheduler ends lr at final_lr_scale*lr
+  # Warmup is 0.05% of epochs -> 0.0005 of total steps
+  phase_ratio: [0.0005, 0.4, 0.5995]

@@ -1,0 +1,65 @@
+[project]
+name = "pasketti-phonetic-track"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "~=3.11.13"
+dependencies = [
+    "cuda-python>=12.6,<12.7",
+    "english-to-ipa @ git+https://github.com/mphilli/English-to-IPA",
+    "librosa",
+    "loguru",
+    "nemo_toolkit[asr]>=2.5.0",
+    "peft",
+    "qwen-asr",
+    "sacrebleu", # Needed for NeMo SpeechLM2
+    "soundfile",
+    "transformers[torch]>=4.52.4",
+    "torch==2.9.0",
+    "torchaudio",
+    "torchcodec==0.9.0",
+    "tqdm",
+    "pip-tools>=7.5.3",
+    "wandb>=0.25.0",
+    "hydra-core>=1.3.2",
+    "polars>=1.38.1",
+    "seaborn>=0.13.2",
+    "plotly>=6.5.2",
+    "scikit-learn>=1.8.0",
+    "smac>=2.3.1",
+    "dask>=2026.1.2",
+    "pyctcdecode>=0.5.0",
+    "audiomentations>=0.43.1",
+    "ema-pytorch>=0.7.9",
+    "demucs>=4.0.1",
+    "xgboost>=3.2.0",
+    "editdistance>=0.6.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[tool.uv]
+required-version = ">=0.9.24"
+environments = [
+  "sys_platform == 'linux'"
+]
+no-build-package = ["vllm"]
+
+# Override constraints to allow qwen-asr without breaking existing packages
+override-dependencies = [
+    "transformers>=4.57.6,<4.58",  # NeMo pins <4.54, qwen-asr needs >=4.57.6
+    "pillow>=12",                   # Prevent gradio 3.x from downgrading pillow
+    "torch==2.9.0",                 # Ensure ema-pytorch uses our pinned torch version
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
