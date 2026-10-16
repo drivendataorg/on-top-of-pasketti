@@ -13,6 +13,8 @@ Automatic speech recognition (ASR) models transcribe adult speech well but strug
 
 The challenge ran two tracks: the [**Word Track**](https://www.drivendata.org/competitions/308/childrens-word-asr/) focused on accurate word-level transcription to enable automated transcription, verbal tool use, and assessments of comprehension and reasoning; and the [**Phonetic Track**](https://www.drivendata.org/competitions/309/childrens-phonetic-asr/) focused on capturing the sounds children actually produce, which is critical for diagnostic applications like speech pathology screening.
 
+> To see the final model results from the project and access the transcriptions produced, check out the <a href="https://drivendata.co/kidsasr" target="_blank">Project Summary</a>. Both word and phonetic models are now available on <a href="https://huggingface.co/collections/drivendata/pasketti" target="_blank">HuggingFace</a>! 🤗
+
 ## What's in this Repository
 
 This repository contains code from winning competitors in the [On Top of Pasketti: Children's Speech Recognition Challenge](https://www.drivendata.org/competitions/group/childrens-asr-competition/) on DrivenData. Code for all winning solutions are open source under the MIT License.
